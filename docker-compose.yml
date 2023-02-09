@@ -9,6 +9,7 @@ services:
     volumes:
       - "./nginx/:/etc/nginx/templates/"
       - ./certs:/etc/certs
+      - "./nginx/custom_proxy_settings.conf:/etc/nginx/conf.d/custom_proxy_settings.conf"
     environment:
       - "NGINX_ENVSUBST_TEMPLATE_SUFFIX=.conf"
       - "DOMAIN=${DOMAIN}"
@@ -18,7 +19,7 @@ services:
 
   mysql:
     # Uncomment the below line for m1 macs
-    # platform: linux/x86_64
+    platform: linux/x86_64
     image: mysql:8.0
     container_name: ${APP_NAME}-mysql
     volumes:
@@ -39,6 +40,7 @@ services:
     volumes: 
       - ./wordpress:/var/www/html
       - ./config/php.ini:/usr/local/etc/php/conf.d/php.ini
+      - ./config/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     environment:
       WORDPRESS_DB_HOST: mysql
       WORDPRESS_DB_NAME: ${DB_NAME}
@@ -55,6 +57,7 @@ services:
       PMA_HOST: "${DB_HOST}"
       PMA_PORT: 3306
       MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+
     ports:
       - '8080:80'
     links:
