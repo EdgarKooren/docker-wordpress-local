@@ -23,7 +23,7 @@ services:
     image: mysql:8.0
     container_name: ${APP_NAME}-mysql
     volumes:
-      - ./db:/var/lib/mysql
+      - ./db:/var/lib/mysql:delegated
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
@@ -38,7 +38,7 @@ services:
     container_name: ${APP_NAME}-wordpress
     restart: always
     volumes: 
-      - ./wordpress:/var/www/html
+      - ./wordpress:/var/www/html:delegated
       - ./config/php.ini:/usr/local/etc/php/conf.d/php.ini
       - ./config/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     environment:
@@ -47,19 +47,19 @@ services:
       WORDPRESS_DB_USER: ${DB_USER}
       WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
 
-
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: ${APP_NAME}-phpmyadmin
-    volumes:
-      - ./config/phpmyadmin.ini:/usr/local/etc/php/conf.d/phpmyadmin.ini
+    depends_on:
+      - mysql
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8083:80
     environment:
       PMA_HOST: "${DB_HOST}"
       PMA_PORT: 3306
       MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
-
-    ports:
-      - '8080:80'
+    container_name: ${APP_NAME}-phpmyadmin
+    volumes:
+       - ./config/phpmyadmin.ini:/usr/local/etc/php/conf.d/phpmyadmin.ini
     links:
-      - mysql:mysql
-
+       - mysql:mysql
